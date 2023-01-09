@@ -1,0 +1,48 @@
+---
+
+- hosts: all
+  become: yes
+  tasks:
+
+    - name: Updating apt cache and Installing nginx
+      apt:
+        name: nginx
+        state: latest
+        update_cache: yes
+
+    - name: Installing php
+      apt:
+        name: php8.1-fpm
+        state: latest
+
+    - name: Removing nginx html file
+      file:
+        path: /var/www/html/index.nginx-debian.html
+        state: absent
+
+    - name: Removing default nginx file
+      file:
+        path: /etc/nginx/sites-available/default
+        state: absent
+
+    - name: Copying the nginx default file to server
+      copy:
+        src: default
+        dest: /etc/nginx/sites-available
+        owner: root
+        group: root
+        mode: 0744
+
+    - name: Copying the php file to print hostname to server
+      copy:
+        src: index.php
+        dest: /var/www/html
+        owner: root
+        group: root
+        mode: 0744
+
+    - name: Restarting nginx
+      service:
+        name: nginx
+        state: restarted
+        enabled: yes
